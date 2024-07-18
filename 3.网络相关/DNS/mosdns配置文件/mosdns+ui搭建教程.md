@@ -1,4 +1,5 @@
 创建lxc容器模板
+[下载地址](https://github.com/KHTdhl/rosrbgprouter/releases/download/v1.0.0/ubuntu-22.04-standard_22.04-1_amd64.1.tar.zst)
 乌班图下载
 /var/lib/vz/template/cache
 #上传文件夹
