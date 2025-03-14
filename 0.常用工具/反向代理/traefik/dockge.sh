@@ -31,11 +31,14 @@ curl -fsSL https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml
 # 输出正在修改文件的信息
 echo "正在修改 compose.yaml 文件，添加 container_name: dockge"
 
-#添加容器名称，方便traefik识别
-sed -i '/dockge:/a \ \ \ \ container_name: dockge' "compose.yaml"
-
-# 输出修改完成的信息
-echo "已成功在 compose.yaml 中添加 container_name: dockge"
+# 检查是否已经定义了 container_name
+if ! grep -q "container_name: dockge" "compose.yaml"; then
+  # 如果没有定义，则添加 container_name 到 dockge 服务
+  sed -i '/image:/i \ \ \ \ container_name: dockge' "compose.yaml"
+  echo "已成功在 compose.yaml 中添加 container_name: dockge"
+else
+  echo "container_name 已经在文件中定义，跳过添加。"
+fi
 
 # 在 compose.yaml 文件末尾添加日志配置
 echo "在 compose.yaml 文件末尾添加日志配置..."
