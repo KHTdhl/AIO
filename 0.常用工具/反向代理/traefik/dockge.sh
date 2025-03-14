@@ -28,6 +28,19 @@ cd /opt/dockge
 echo "正在下载 Dockge 的 compose.yaml 配置文件..."
 curl -fsSL https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml -o compose.yaml
 
+# 输出正在修改文件的信息
+echo "正在修改 compose.yaml 文件，添加 container_name: dockge"
+
+#添加容器名称，方便traefik识别
+sed -i '/dockge:/a \ \ \ \ container_name: dockge' "compose.yaml"
+
+# 输出修改完成的信息
+echo "已成功在 compose.yaml 中添加 container_name: dockge"
+
+# 在 compose.yaml 文件末尾添加日志配置
+echo "在 compose.yaml 文件末尾添加日志配置..."
+echo -e "logging:\n      driver: json-file\n      options:\n        max-size: 1m" >> compose.yaml
+
 # 启动 Dockge
 echo "正在使用 Docker Compose 启动 Dockge..."
 sudo docker compose up -d
