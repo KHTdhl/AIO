@@ -70,8 +70,10 @@ services:
         # 指定 Docker 网络为 traefik。
       - --providers.docker.watch=true 
         # 启用监视 Docker 容器的变化。
-      - --providers.docker.exposedbydefault=false 
+      - --providers.docker.exposedbydefault=true
         # 禁用默认暴露 Docker 容器。
+      - --providers.docker.defaultRule=Host(`{{.ContainerName }}.baidu.cn`)  
+        # 默认绑定域名路径
       - --providers.docker.useBindPortIP=false 
         # 禁用绑定端口和 IP。
       - --providers.file=true 
