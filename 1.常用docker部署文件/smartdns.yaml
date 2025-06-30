@@ -1,0 +1,14 @@
+services:
+  smartdns:
+    container_name: smartdns-a
+    restart: always
+    ports:
+      - 6353:53/udp
+    volumes:
+      - /home/docker/smartdns-a:/etc/smartdns
+      - /home/docker/smartdns-a/cache:/etc/smartdns/cache
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m  
+    image: pymumu/smartdns:latest

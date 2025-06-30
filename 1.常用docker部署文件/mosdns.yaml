@@ -1,0 +1,13 @@
+services:
+  mosdns:
+    container_name: mosdns
+    ports:
+      - 53:53/udp
+      - 53:53/tcp
+    volumes:
+      - /etc/mosdns:/etc/mosdns
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m        
+    image: irinesistiana/mosdns:latest

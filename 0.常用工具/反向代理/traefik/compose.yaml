@@ -1,0 +1,73 @@
+version: "3"
+services:
+  traefik:
+    image: traefik:v3.1
+    restart: always
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+    command:
+      - --global.sendanonymoususage=false
+      - --global.checknewversion=false
+      - --api=true
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --api.debug=false
+      - --ping=true
+      - --log.level=DEBUG
+      - --log.format=common
+      - --accesslog=false
+      - --entryPoints.web.address=:80
+      - --entryPoints.web.http.redirections.entryPoint.to=websecure
+      - --entryPoints.web.http.redirections.entryPoint.scheme=https
+      - --entryPoints.websecure.address=:443
+      - --providers.docker=true
+      - --providers.docker.network=traefik
+      - --providers.docker.watch=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.useBindPortIP=false
+      - --providers.file=true
+      - --providers.file.watch=true
+      - --providers.file.filename=/etc/traefik/traefik_dynamic.yaml
+      - --providers.file.debugloggeneratedtemplate=true
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=alidns
+      - --certificatesresolvers.letsencrypt.acme.email=xxxxxxx
+      - --certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json
+    labels:
+      - traefik.enable=false
+      - traefik.docker.network=traefik
+    networks:
+      - traefik
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs/acme.json:/etc/traefik/acme/acme.json
+      - ./config/:/etc/traefik/config/:ro
+      - ./config/traefik_dynamic.yaml:/etc/traefik/traefik_dynamic.yaml:ro
+    env_file:
+      - .env.traefik
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q --spider --proxy off localhost:8080/ping || exit 1
+      interval: 3s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+networks:
+  traefik:
+    external: true

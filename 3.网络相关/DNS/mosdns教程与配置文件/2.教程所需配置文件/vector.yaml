@@ -1,0 +1,82 @@
+data_dir: /tmp/vector
+
+sources:
+  mosdns-log-file:
+    type: file
+    include:
+      - /etc/mosdns/mosdns.log
+    read_from: beginning
+
+transforms:
+  mosdns-input:
+    type: filter
+    inputs:
+      - mosdns-log-file
+    condition: |
+      .file == "/etc/mosdns/mosdns.log"      
+
+  mosdns-data:
+    type: remap
+    inputs:
+      - mosdns-input
+    drop_on_error: true
+    source: |
+      .type = "mosdns"
+      .app = "mosdns"
+      del(.host)
+      del(.file)
+      del(.source_type)
+
+      message_parts = split!(.message, r'\t')
+
+      .timestamp = parse_timestamp!(message_parts[0], format: "%FT%T%.9f%z")
+      .level = message_parts[1]
+
+      if (length(message_parts) == 6) {
+        .plugin = message_parts[2]
+        .processor = message_parts[3]
+        .message = message_parts[4]
+
+        if (exists(message_parts[5])) {
+          .metadata = parse_json!(message_parts[5])
+          . = merge!(., .metadata)
+          del(.metadata)
+        }
+      } else {
+        .processor = message_parts[2]
+        .message = message_parts[3]
+
+        if (exists(message_parts[4])) {
+          .metadata = parse_json!(message_parts[4])
+          . = merge!(., .metadata)
+          del(.metadata)
+        }
+      }
+
+      if (exists(.query)) {
+        . = merge!(., .query)
+        del(.query)
+      }      
+
+sinks:
+  # 同步到 loki，根据实际情况修改 endpoint 的值
+  loki:
+    type: loki
+    inputs:
+      - mosdns-data
+    endpoint: 'http://127.0.0.1:3100'
+    encoding:
+      codec: json
+    labels:
+      app: '{{ app }}'
+      type: '{{ type }}'
+    healthcheck:
+      enabled: true
+
+  # 临时输出转换数据到 vector 控制台（生产环境请禁用）
+  debug_mosdns:
+    type: console
+    inputs:
+      - mosdns-data
+    encoding:
+      codec: json

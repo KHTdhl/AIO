@@ -1,0 +1,146 @@
+version: "3" 
+# 定义 Docker Compose 文件的版本，这里是版本 3。
+services: 
+# 定义要启动的服务。
+  traefik: 
+  # 定义一个名为 "traefik" 的服务。
+    image: traefik:v3.1 
+    # 使用 Traefik 的 Docker 镜像版本 v3.1。
+    restart: always 
+    # 设置服务总是重启，除非手动停止。
+    ports: 
+    # 映射端口配置。
+      - target: 80 
+        # 容器内部的端口 80。
+        published: 80 
+        # 映射到主机的端口 80。
+        protocol: tcp 
+        # 使用 TCP 协议。
+        mode: host 
+        # 使用宿主机模式，直接绑定到宿主机。
+      - target: 443 
+        # 容器内部的端口 443。
+        published: 443 
+        # 映射到主机的端口 443。
+        protocol: tcp 
+        # 使用 TCP 协议。
+        mode: host 
+        # 使用宿主机模式，直接绑定到宿主机。
+      - target: 8080 
+        # 容器内部的端口 8080。
+        published: 8080 
+        # 映射到主机的端口 8080。
+        protocol: tcp 
+        # 使用 TCP 协议。
+        mode: host 
+        # 使用宿主机模式，直接绑定到宿主机。
+    command: 
+    # 在容器启动时传递的命令行参数。
+      - --global.sendanonymoususage=false 
+        # 禁用匿名使用数据发送。
+      - --global.checknewversion=false 
+        # 禁用检查新版本。
+      - --api=true 
+        # 启用 API。
+      - --api.dashboard=true 
+        # 启用 Traefik 仪表板。
+      - --api.insecure=true 
+        # 允许不安全的 API 访问（用于测试/调试）。
+      - --api.debug=false 
+        # 禁用 API 调试模式。
+      - --ping=true 
+        # 启用健康检查的 ping 功能。
+      - --log.level=DEBUG 
+        # 设置日志级别为 DEBUG。
+      - --log.format=common 
+        # 设置日志格式为常见格式。
+      - --accesslog=false 
+        # 禁用访问日志。
+      - --entryPoints.web.address=:80 
+        # 配置 Web 的入口点，监听 80 端口。
+      - --entryPoints.web.http.redirections.entryPoint.to=websecure 
+        # 配置 HTTP 重定向到 HTTPS。
+      - --entryPoints.web.http.redirections.entryPoint.scheme=https 
+        # 重定向为 HTTPS。
+      - --entryPoints.websecure.address=:443 
+        # 配置 WebSecure 的入口点，监听 443 端口。
+      - --providers.docker=true 
+        # 启用 Docker 作为 provider（提供者）。
+      - --providers.docker.network=traefik 
+        # 指定 Docker 网络为 traefik。
+      - --providers.docker.watch=true 
+        # 启用监视 Docker 容器的变化。
+      - --providers.docker.exposedbydefault=true
+        # 禁用默认暴露 Docker 容器。
+      - --providers.docker.defaultRule=Host(`{{.ContainerName }}.baidu.cn`)  
+        # 默认绑定域名路径
+      - --providers.docker.useBindPortIP=false 
+        # 禁用绑定端口和 IP。
+      - --providers.file=true 
+        # 启用文件作为 provider（提供者）。
+      - --providers.file.watch=true 
+        # 启用文件监视。
+      - --providers.file.filename=/etc/traefik/traefik_dynamic.yaml 
+        # 动态配置文件的位置。
+      - --providers.file.debugloggeneratedtemplate=true 
+        # 启用生成模板的调试日志。
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true 
+        # 启用 DNS 挑战方式验证 Let's Encrypt 证书。
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=alidns 
+        # 指定 DNS 提供商为阿里云 DNS。
+      - --certificatesresolvers.letsencrypt.acme.email=xxxxxxx 
+        # Let's Encrypt 注册的电子邮件地址。
+      - --certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json 
+        # 证书存储位置。
+    labels: 
+    # 定义与服务关联的标签。
+      - traefik.enable=false 
+        # 禁用此服务在 Traefik 中的自动暴露。
+      - traefik.docker.network=traefik 
+        # 为该服务指定 Docker 网络。
+    networks: 
+    # 配置服务连接的 Docker 网络。
+      - traefik 
+        # 服务连接到 "traefik" 网络。
+    environment: 
+    # 环境变量配置。
+      - TZ=Asia/Shanghai 
+        # 设置时区为上海。
+    volumes: 
+    # 配置 Docker 卷挂载。
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
+        # 挂载 Docker 套接字，以便 Traefik 可以与 Docker 通信。
+      - ./certs/acme.json:/etc/traefik/acme/acme.json 
+        # 挂载证书文件。
+      - ./config/:/etc/traefik/config/:ro 
+        # 挂载配置文件目录。
+      - ./config/traefik_dynamic.yaml:/etc/traefik/traefik_dynamic.yaml:ro 
+        # 挂载动态配置文件。
+    env_file: 
+    # 加载环境变量文件。
+      - .env.traefik 
+        # 指定环境变量文件路径。
+    healthcheck: 
+    # 配置健康检查。
+      test:
+        - CMD-SHELL 
+          # 使用 shell 命令进行健康检查。
+        - wget -q --spider --proxy off localhost:8080/ping || exit 1 
+          # 请求 localhost:8080/ping 来检查 Traefik 是否响应。
+      interval: 3s 
+        # 健康检查间隔为 3 秒。
+      retries: 10 
+        # 健康检查失败重试 10 次。
+    logging: 
+    # 配置日志。
+      driver: json-file 
+        # 使用 JSON 格式的日志。
+      options:
+        max-size: 1m 
+          # 限制每个日志文件的最大大小为 1MB。
+networks: 
+# 配置网络。
+  traefik: 
+    # 定义一个名为 "traefik" 的网络。
+    external: true 
+    # 使用外部已存在的网络。
