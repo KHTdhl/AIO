@@ -5,8 +5,8 @@ services:
     ports:
       - 5353:5353/udp
     volumes:
-      - /home/docker/smartdns:/etc/smartdns
-      - /home/docker/smartdns/cache:/etc/smartdns/cache
+      - ./smartdns:/etc/smartdns
+      - ./cache:/etc/smartdns/cache
     logging:
       driver: json-file
       options:

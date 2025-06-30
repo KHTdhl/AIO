@@ -3,8 +3,8 @@ services:
   adguardhome:
     container_name: adguardhome
     volumes:
-      - /home/docker/my/own/workdir:/opt/adguardhome/work
-      - /home/docker/my/own/confdir:/opt/adguardhome/conf
+      - ./workdir:/opt/adguardhome/work
+      - ./confdir:/opt/adguardhome/conf
     ports:
       - 5319:53/tcp
       - 5319:53/udp
