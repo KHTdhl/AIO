@@ -3,7 +3,7 @@ services:
     container_name: smartdns-a
     restart: always
     ports:
-      - 6353:6353/udp
+      - 6053:6353/udp
     volumes:
       - ./smartdns-a:/etc/smartdns
       - ./cache:/etc/smartdns/cache

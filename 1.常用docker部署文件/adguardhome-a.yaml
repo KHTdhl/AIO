@@ -5,11 +5,11 @@ services:
       - ./workdir:/opt/adguardhome/work
       - ./confdir:/opt/adguardhome/conf
     ports:
-      - 25319:53/tcp
-      - 25319:53/udp
+      - 3053:53/tcp
+      - 3053:53/udp
       - 2067:67/udp
       - 2068:68/udp
-      - 2803:80/tcp
+      - 2080:80/tcp
       - 29443:443/tcp
       - 29443:443/udp
       - 23069:3000/tcp
