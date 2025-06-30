@@ -1,6 +1,6 @@
 services:
   smartdns:
-    container_name: smartdns-a
+    container_name: smartdns
     restart: always
     ports:
       - 5353:5353/udp
