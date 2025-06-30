@@ -3,10 +3,10 @@ services:
     container_name: smartdns-a
     restart: always
     ports:
-      - 5353:5353/udp
+      - 6353:6353/udp
     volumes:
-      - /home/docker/smartdns:/etc/smartdns
-      - /home/docker/smartdns/cache:/etc/smartdns/cache
+      - /home/docker/smartdns-a:/etc/smartdns
+      - /home/docker/smartdns-a/cache:/etc/smartdns/cache
     logging:
       driver: json-file
       options:
