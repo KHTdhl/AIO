@@ -1,6 +1,7 @@
 services:
   mosdns:
     container_name: mosdns
+    restart: always
     ports:
       - 53:53/udp
       - 53:53/tcp
