@@ -3,6 +3,7 @@
 set -e
 
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+P10K_CONFIG_URL="https://raw.githubusercontent.com/KHTdhl/AIO/main/0.%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/1.%E5%B8%B8%E7%94%A8%E8%84%9A%E6%9C%AC/p10k"
 
 echo "[+] 检查 zsh 是否安装..."
 if ! command -v zsh >/dev/null 2>&1; then
@@ -27,19 +28,18 @@ else
     echo "[=] 已安装 oh-my-zsh"
 fi
 
-# 安装 zsh-autosuggestions
+# 安装插件
 if [ ! -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ]; then
     echo "[+] 安装 zsh-autosuggestions..."
     git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
 fi
 
-# 安装 zsh-syntax-highlighting
 if [ ! -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ]; then
     echo "[+] 安装 zsh-syntax-highlighting..."
     git clone https://github.com/zsh-users/zsh-syntax-highlighting "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
 fi
 
-# 安装 powerlevel10k
+# 安装 powerlevel10k 主题
 if [ ! -d "${ZSH_CUSTOM}/themes/powerlevel10k" ]; then
     echo "[+] 安装 powerlevel10k 主题..."
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM}/themes/powerlevel10k"
@@ -53,7 +53,7 @@ fi
 
 cd ~
 
-# 更新 .zshrc 插件和主题配置
+# 配置 .zshrc
 echo "[+] 配置 .zshrc ..."
 sed -i 's/^ZSH_THEME=.*/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
 sed -i '/^plugins=/c\plugins=(git zsh-autosuggestions zsh-syntax-highlighting z)' ~/.zshrc
@@ -63,7 +63,17 @@ if ! grep -q "source \$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-hig
     echo "source \$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ~/.zshrc
 fi
 
-echo "[✔] 所有插件与主题已安装！请重新打开终端或执行："
+# 下载并应用 Powerlevel10k 配置文件
+echo "[+] 应用预设的 powerlevel10k 配置..."
+curl -fsSL "$P10K_CONFIG_URL" -o ~/.p10k.zsh
+
+# 确保 .zshrc 中引用 .p10k.zsh
+if ! grep -q '\[ -f ~/.p10k.zsh \] && source ~/.p10k.zsh' ~/.zshrc; then
+    echo '[ -f ~/.p10k.zsh ] && source ~/.p10k.zsh' >> ~/.zshrc
+fi
+
+echo
+echo "[✔] 所有插件与主题已安装！请重新打开终端或执行以下命令以生效："
 echo "   source ~/.zshrc"
 echo
-echo "👉 Powerlevel10k 会首次启动时自动引导配置（终端需支持 Meslo 字体）"
+echo "👉 Powerlevel10k 已配置完成，无需首次手动引导，终端需支持 Meslo 字体。"
