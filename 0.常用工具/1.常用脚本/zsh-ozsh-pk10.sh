@@ -42,7 +42,7 @@ fi
 # 安装 powerlevel10k 主题
 if [ ! -d "${ZSH_CUSTOM}/themes/powerlevel10k" ]; then
     echo "[+] 安装 powerlevel10k 主题..."
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM}/themes/powerlevel10k"
+     git clone --depth=1 --branch v1.20.0 https://ghproxy.com/https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM}/themes/powerlevel10k"
 fi
 
 # 设置默认 shell 为 zsh
