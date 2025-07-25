@@ -1,0 +1,24 @@
+$fontUrls = @(
+  "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf",
+  "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf",
+  "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf",
+  "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf"
+)
+
+$fontTargetDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
+New-Item -ItemType Directory -Force -Path $fontTargetDir | Out-Null
+
+foreach ($url in $fontUrls) {
+    $fileName = [System.IO.Path]::GetFileName($url)
+    $destPath = Join-Path $fontTargetDir $fileName
+
+    Write-Host "📥 正在下载 $fileName..."
+    Invoke-WebRequest -Uri $url -OutFile $destPath
+
+    # 注册字体（仅当前用户，不需要管理员权限）
+    $fontName = $fileName -replace ".ttf$", ""
+    New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" `
+        -Name "$fontName (TrueType)" -PropertyType String -Value $fileName -Force | Out-Null
+}
+
+Write-Host "`n✅ 所有字体安装完成，请重新启动程序后生效（如 Windows Terminal）"
